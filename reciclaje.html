@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoHéroes - Juego de Reciclaje</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2ECC71;
+    --verde-oscuro: #1a8a4a;
+    --azul: #3498DB;
+    --amarillo: #F1C40F;
+    --naranja: #E67E22;
+    --rojo: #E74C3C;
+    --cielo: #87CEEB;
+    --arena: #F5DEB3;
+    --tierra: #8B6914;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background: #e8f5e9;
+    min-height: 100vh;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ====== PANTALLAS ====== */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* ====== MENÚ ====== */
+  #menu {
+    background: linear-gradient(180deg, #87CEEB 0%, #b8f0c8 60%, #5cb85c 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .sol {
+    position: absolute; top: 30px; right: 80px;
+    width: 80px; height: 80px;
+    background: #FFD700;
+    border-radius: 50%;
+    box-shadow: 0 0 40px 10px #ffe066;
+    animation: pulsaSol 3s ease-in-out infinite;
+  }
+  @keyframes pulsaSol {
+    0%,100% { box-shadow: 0 0 40px 10px #ffe066; }
+    50% { box-shadow: 0 0 60px 20px #ffe066; }
+  }
+  .nube {
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.8;
+    animation: flotaNube linear infinite;
+  }
+  @keyframes flotaNube {
+    0% { transform: translateX(-200px); }
+    100% { transform: translateX(110vw); }
+  }
+
+  /* PALMERAS */
+  .palmeras-fondo {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 220px; display: flex; align-items: flex-end;
+    justify-content: space-around; padding: 0 30px;
+    pointer-events: none;
+  }
+  .palmera { display: flex; flex-direction: column; align-items: center; }
+  .tronco-palma {
+    width: 18px;
+    background: linear-gradient(90deg, #a0522d, #cd853f, #a0522d);
+    border-radius: 4px;
+    transform-origin: bottom center;
+  }
+  .hoja-palma {
+    position: absolute;
+    width: 70px; height: 18px;
+    background: var(--verde);
+    border-radius: 0 50% 50% 0;
+    transform-origin: left center;
+  }
+  .hojas-container {
+    position: relative;
+    width: 0; height: 0;
+  }
+
+  .palmera-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: bottom center;
+  }
+  .palmera-wrap.p1 { animation: mecePalma1 3s ease-in-out infinite; }
+  .palmera-wrap.p2 { animation: mecePalma2 3.5s ease-in-out infinite; }
+  .palmera-wrap.p3 { animation: mecePalma3 2.8s ease-in-out infinite; }
+  .palmera-wrap.p4 { animation: mecePalma1 4s ease-in-out infinite reverse; }
+  .palmera-wrap.p5 { animation: mecePalma2 3.2s ease-in-out infinite; }
+
+  @keyframes mecePalma1 {
+    0%,100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg); }
+  }
+  @keyframes mecePalma2 {
+    0%,100% { transform: rotate(-6deg); }
+    50% { transform: rotate(3deg); }
+  }
+  @keyframes mecePalma3 {
+    0%,100% { transform: rotate(-3deg); }
+    50% { transform: rotate(5deg); }
+  }
+
+  .menu-titulo {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 900;
+    color: white;
+    text-shadow: 4px 4px 0 #1a6b2a, -2px -2px 0 #1a6b2a, 2px -2px 0 #1a6b2a, -2px 2px 0 #1a6b2a;
+    margin-bottom: 10px;
+    animation: saltaTitulo 2s ease-in-out infinite;
+    z-index: 10; position: relative;
+  }
+  @keyframes saltaTitulo {
+    0%,100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-8px) rotate(1deg); }
+  }
+  .menu-subtitulo {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-weight: 700;
+    color: #1a6b2a;
+    background: rgba(255,255,255,0.7);
+    padding: 6px 20px; border-radius: 30px;
+    margin-bottom: 40px;
+    z-index: 10; position: relative;
+  }
+  .menu-botones { display: flex; flex-direction: column; gap: 15px; z-index: 10; position: relative; }
+  .btn-menu {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.4rem; font-weight: 800;
+    padding: 16px 60px;
+    border: none; border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .btn-menu:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+  .btn-menu.verde { background: var(--verde); color: white; }
+  .btn-menu.verde:hover { background: #27ae60; transform: scale(1.04); }
+  .btn-menu.azul { background: var(--azul); color: white; }
+  .btn-menu.azul:hover { background: #2980b9; transform: scale(1.04); }
+  .btn-menu.naranja { background: var(--naranja); color: white; }
+  .btn-menu.naranja:hover { background: #d35400; transform: scale(1.04); }
+
+  /* ====== SELECCIÓN DE NIVEL ====== */
+  #nivel {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    padding: 30px 20px;
+    gap: 20px;
+  }
+  .nivel-titulo {
+    font-family: 'Nunito', sans-serif;
+    font-size: 2.5rem; font-weight: 900;
+    color: var(--verde-oscuro);
+  }
+  .nivel-cards {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    justify-content: center; max-width: 800px;
+  }
+  .nivel-card {
+    width: 200px; padding: 25px 20px;
+    border-radius: 20px; text-align: center;
+    cursor: pointer; border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  }
+  .nivel-card:hover { transform: translateY(-6px) scale(1.03); box-shadow: 0 15px 30px rgba(0,0,0,0.15); }
+  .nivel-card .icono { font-size: 3.5rem; margin-bottom: 10px; }
+  .nivel-card .nomb { font-family: 'Nunito', sans-serif; font-size: 1.3rem; font-weight: 800; color: white; }
+  .nivel-card .desc { font-size: 0.85rem; color: rgba(255,255,255,0.85); margin-top: 4px; }
+  .nc-facil { background: linear-gradient(135deg, #2ECC71, #27ae60); }
+  .nc-medio { background: linear-gradient(135deg, #F1C40F, #d4a017); }
+  .nc-dificil { background: linear-gradient(135deg, #E74C3C, #c0392b); }
+  .btn-volver {
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700;
+    padding: 10px 30px; border-radius: 30px; border: none;
+    background: #ccc; color: #555; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-volver:hover { background: #bbb; }
+
+  /* ====== JUEGO ====== */
+  #juego {
+    background: linear-gradient(180deg, #e3f2fd 0%, #f1f8e9 100%);
+    padding: 10px;
+    justify-content: flex-start;
+    min-height: 100vh;
+  }
+  .hud {
+    display: flex; gap: 20px; align-items: center;
+    background: white; border-radius: 20px; padding: 12px 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin-bottom: 15px; width: 100%; max-width: 700px;
+    flex-wrap: wrap;
+  }
+  .hud-item { display: flex; align-items: center; gap: 8px; font-family: 'Nunito', sans-serif; font-weight: 800; }
+  .hud-item .val { font-size: 1.4rem; color: var(--verde-oscuro); }
+  .hud-item .lbl { font-size: 0.85rem; color: #888; }
+  .barra-tiempo { flex: 1; min-width: 100px; height: 16px; background: #e0e0e0; border-radius: 10px; overflow: hidden; }
+  .barra-fill { height: 100%; background: linear-gradient(90deg, #2ECC71, #F1C40F); border-radius: 10px; transition: width 1s linear; }
+
+  .zona-juego {
+    width: 100%; max-width: 700px;
+    background: white; border-radius: 20px;
+    padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .pregunta-box {
+    background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+    border-radius: 16px; padding: 18px 24px;
+    text-align: center; width: 100%;
+  }
+  .pregunta-label { font-size: 0.85rem; color: #888; font-weight: 600; margin-bottom: 6px; }
+  .pregunta-texto {
+    font-family: 'Nunito', sans-serif; font-size: clamp(1.1rem, 3vw, 1.4rem);
+    font-weight: 800; color: #2c3e50;
+  }
+  .objeto-emoji { font-size: clamp(3rem, 10vw, 5rem); margin: 10px 0; animation: flotaObjeto 1.5s ease-in-out infinite; }
+  @keyframes flotaObjeto {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .contenedores {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; width: 100%;
+  }
+  .contenedor-btn {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 16px 14px; border-radius: 16px; border: 3px solid transparent;
+    cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+    min-width: 110px; flex: 1; max-width: 160px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    font-family: 'Nunito', sans-serif;
+  }
+  .contenedor-btn:hover { transform: scale(1.06); box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+  .contenedor-btn .icono-c { font-size: 2.2rem; margin-bottom: 6px; }
+  .contenedor-btn .nombre-c { font-size: 0.85rem; font-weight: 800; color: white; }
+  .cb-verde { background: linear-gradient(135deg, #2ECC71, #1abc9c); }
+  .cb-amarillo { background: linear-gradient(135deg, #F1C40F, #e0a800); }
+  .cb-azul { background: linear-gradient(135deg, #3498DB, #2980b9); }
+  .cb-rojo { background: linear-gradient(135deg, #E74C3C, #c0392b); }
+  .cb-cafe { background: linear-gradient(135deg, #8B6914, #a0522d); }
+
+  .contenedor-btn.correcto { animation: pulsoVerde 0.4s ease; border-color: #2ECC71; }
+  .contenedor-btn.incorrecto { animation: temblor 0.4s ease; border-color: #E74C3C; }
+  @keyframes pulsoVerde {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+  @keyframes temblor {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  .feedback-msg {
+    font-family: 'Nunito', sans-serif; font-size: 1.3rem; font-weight: 900;
+    padding: 12px 30px; border-radius: 30px;
+    opacity: 0; transition: opacity 0.3s;
+    text-align: center;
+  }
+  .feedback-msg.show { opacity: 1; }
+  .feedback-msg.ok { background: #d4edda; color: #155724; }
+  .feedback-msg.fail { background: #f8d7da; color: #721c24; }
+
+  .dato-eco {
+    background: linear-gradient(135deg, #fff9c4, #fff3cd);
+    border-left: 5px solid #F1C40F;
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 0.9rem; color: #6d5104; width: 100%;
+    display: none;
+  }
+  .dato-eco.show { display: block; }
+  .dato-eco strong { color: #4a3700; }
+
+  /* ====== RESULTADOS ====== */
+  #resultados {
+    background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+    text-align: center; gap: 20px; padding: 30px 20px;
+  }
+  .resultado-trofeo { font-size: 6rem; animation: saltaTrofeo 1s ease-in-out infinite; }
+  @keyframes saltaTrofeo {
+    0%,100% { transform: scale(1) rotate(-5deg); }
+    50% { transform: scale(1.1) rotate(5deg); }
+  }
+  .resultado-titulo {
+    font-family: 'Nunito', sans-serif; font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 900; color: var(--verde-oscuro);
+  }
+  .resultado-stats {
+    display: flex; gap: 20px; flex-wrap: wrap; justify-content: center;
+  }
+  .stat-card {
+    background: white; border-radius: 16px; padding: 20px 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    min-width: 130px;
+  }
+  .stat-card .num { font-family: 'Nunito', sans-serif; font-size: 2.5rem; font-weight: 900; color: var(--verde-oscuro); }
+  .stat-card .etq { font-size: 0.85rem; color: #888; font-weight: 600; }
+  .resultado-msg {
+    font-family: 'Nunito', sans-serif; font-size: 1.2rem; font-weight: 700;
+    background: white; padding: 14px 30px; border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); max-width: 500px; color: #2c3e50;
+  }
+  .resultado-botones { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; }
+
+  /* ====== TUTORIAL ====== */
+  #tutorial {
+    background: linear-gradient(135deg, #fff9c4, #e8f5e9);
+    padding: 30px 20px; gap: 18px;
+  }
+  .tutorial-titulo {
+    font-family: 'Nunito', sans-serif; font-size: 2.2rem; font-weight: 900;
+    color: var(--verde-oscuro);
+  }
+  .tutorial-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px; max-width: 700px; width: 100%;
+  }
+  .tutorial-card {
+    background: white; border-radius: 16px; padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center;
+  }
+  .tutorial-card .ic { font-size: 2.5rem; margin-bottom: 8px; }
+  .tutorial-card h3 { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: #2c3e50; margin-bottom: 6px; }
+  .tutorial-card p { font-size: 0.85rem; color: #666; line-height: 1.4; }
+  .contenedores-info { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; max-width: 700px; }
+  .cont-info {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px; border-radius: 12px;
+    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 0.9rem;
+  }
+  .ci-verde { background: #d4edda; color: #155724; }
+  .ci-amarillo { background: #fff3cd; color: #856404; }
+  .ci-azul { background: #cce5ff; color: #004085; }
+  .ci-rojo { background: #f8d7da; color: #721c24; }
+  .ci-cafe { background: #f5e6cc; color: #7a4f1a; }
+
+  /* Estrellas de puntuación */
+  .estrellas { font-size: 2rem; }
+
+  /* ====== ACERCA DE ====== */
+  #acerca {
+    background: linear-gradient(180deg, #87CEEB 0%, #b8f0c8 60%, #5cb85c 100%);
+    position: relative; overflow: hidden;
+    padding: 30px 20px; gap: 0;
+    justify-content: flex-start;
+  }
+  .acerca-contenido {
+    position: relative; z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 22px; padding: 20px 0 200px; width: 100%; max-width: 680px;
+  }
+  .acerca-logo { font-size: 4rem; animation: saltaTitulo 2.5s ease-in-out infinite; }
+  .acerca-universidad {
+    font-family: 'Nunito', sans-serif; font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-weight: 900; color: white; text-align: center;
+    text-shadow: 3px 3px 0 #1a6b2a, -1px -1px 0 #1a6b2a, 1px -1px 0 #1a6b2a, -1px 1px 0 #1a6b2a;
+    line-height: 1.3;
+  }
+  .acerca-divider {
+    width: 80px; height: 5px; border-radius: 10px;
+    background: linear-gradient(90deg, #F1C40F, #2ECC71, #3498DB);
+  }
+  .acerca-card {
+    background: rgba(255,255,255,0.88);
+    border-radius: 22px; padding: 22px 28px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    width: 100%; text-align: center;
+  }
+  .acerca-card-titulo {
+    font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 800;
+    color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .acerca-card-valor {
+    font-family: 'Nunito', sans-serif; font-size: clamp(1rem, 3vw, 1.25rem);
+    font-weight: 800; color: #1a6b2a;
+  }
+  .acerca-card.highlight .acerca-card-valor { color: var(--naranja); }
+  .integrantes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; width: 100%; }
+  .integrante-card {
+    background: rgba(255,255,255,0.92);
+    border-radius: 18px; padding: 18px 14px; text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1); transition: transform 0.2s;
+    animation: apareceTarjeta 0.5s ease both;
+  }
+  .integrante-card:hover { transform: translateY(-4px); }
+  @keyframes apareceTarjeta {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .integrante-avatar {
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; margin: 0 auto 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .integrante-nombre { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: #2c3e50; }
+  .integrante-rol { font-size: 0.75rem; color: #888; margin-top: 3px; }
+  .ic-1 { background: linear-gradient(135deg,#2ECC71,#1abc9c); }
+  .ic-2 { background: linear-gradient(135deg,#3498DB,#2980b9); }
+  .ic-3 { background: linear-gradient(135deg,#9B59B6,#8e44ad); }
+  .ic-4 { background: linear-gradient(135deg,#E67E22,#d35400); }
+  .acerca-footer {
+    background: rgba(255,255,255,0.75);
+    border-radius: 16px; padding: 12px 24px;
+    font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+    font-weight: 700; color: #1a6b2a; text-align: center;
+  }
+  .acerca-palmeras {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 220px; display: flex; align-items: flex-end;
+    justify-content: space-around; padding: 0 30px;
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Partículas confeti */
+  .confeti-item {
+    position: fixed; top: -20px; border-radius: 4px;
+    animation: caeConfeti linear forwards;
+    pointer-events: none; z-index: 9999;
+  }
+  @keyframes caeConfeti {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ====== MENÚ PRINCIPAL ====== -->
+<div class="screen active" id="menu">
+  <div class="sol"></div>
+
+  <!-- Nubes decorativas -->
+  <div class="nube" style="width:120px;height:45px;top:80px;animation-duration:18s;animation-delay:-5s"></div>
+  <div class="nube" style="width:80px;height:32px;top:130px;animation-duration:22s;animation-delay:-10s"></div>
+  <div class="nube" style="width:150px;height:50px;top:55px;animation-duration:25s;animation-delay:-2s"></div>
+
+  <div class="menu-titulo">🌿 EcoHéroes</div>
+  <div class="menu-subtitulo">¡Aprende a reciclar y salva el planeta!</div>
+
+  <div class="menu-botones">
+    <button class="btn-menu verde" onclick="irA('nivel')">🎮 ¡Jugar!</button>
+    <button class="btn-menu azul" onclick="irA('tutorial')">📚 Cómo jugar</button>
+    <button class="btn-menu naranja" onclick="irA('acerca')">🌎 Acerca de</button>
+    <a href="index.html" style="text-decoration:none;display:flex;justify-content:center">
+      <button class="btn-volver" style="margin-top:6px;font-size:1rem;padding:12px 40px">🏠 Menú Principal</button>
+    </a>
+  </div>
+
+  <!-- PALMERAS SVG ANIMADAS -->
+  <div class="palmeras-fondo" id="palmeras-container"></div>
+</div>
+
+<!-- ====== SELECCIÓN DE NIVEL ====== -->
+<div class="screen" id="nivel">
+  <h2 class="nivel-titulo">🌟 Elige tu nivel</h2>
+  <div class="nivel-cards">
+    <div class="nivel-card nc-facil" onclick="iniciarJuego('facil')">
+      <div class="icono">🌱</div>
+      <div class="nomb">Fácil</div>
+      <div class="desc">5 preguntas · 20 seg c/u</div>
+    </div>
+    <div class="nivel-card nc-medio" onclick="iniciarJuego('medio')">
+      <div class="icono">🌳</div>
+      <div class="nomb">Medio</div>
+      <div class="desc">8 preguntas · 15 seg c/u</div>
+    </div>
+    <div class="nivel-card nc-dificil" onclick="iniciarJuego('dificil')">
+      <div class="icono">🦸</div>
+      <div class="nomb">Difícil</div>
+      <div class="desc">10 preguntas · 10 seg c/u</div>
+    </div>
+  </div>
+  <button class="btn-volver" onclick="irA('menu')">← Volver</button>
+</div>
+
+<!-- ====== JUEGO ====== -->
+<div class="screen" id="juego">
+  <div class="hud">
+    <div class="hud-item">
+      <span>⭐</span>
+      <div>
+        <div class="val" id="hud-puntos">0</div>
+        <div class="lbl">Puntos</div>
+      </div>
+    </div>
+    <div class="hud-item">
+      <span>❓</span>
+      <div>
+        <div class="val" id="hud-pregunta">1/5</div>
+        <div class="lbl">Pregunta</div>
+      </div>
+    </div>
+    <div class="hud-item" style="flex:1">
+      <span>⏱️</span>
+      <div style="flex:1">
+        <div class="lbl" id="hud-tiempo-lbl">Tiempo</div>
+        <div class="barra-tiempo"><div class="barra-fill" id="barra-tiempo-fill"></div></div>
+      </div>
+    </div>
+    <div class="hud-item">
+      <span>💚</span>
+      <div>
+        <div class="val" id="hud-vidas">3</div>
+        <div class="lbl">Vidas</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="zona-juego">
+    <div class="pregunta-box">
+      <div class="pregunta-label">¿En qué contenedor va esto?</div>
+      <div class="objeto-emoji" id="obj-emoji">🍾</div>
+      <div class="pregunta-texto" id="obj-nombre">Botella de vidrio</div>
+    </div>
+
+    <div class="contenedores" id="contenedores-grid"></div>
+
+    <div class="feedback-msg" id="feedback"></div>
+    <div class="dato-eco" id="dato-eco"></div>
+  </div>
+</div>
+
+<!-- ====== TUTORIAL ====== -->
+<div class="screen" id="tutorial">
+  <h2 class="tutorial-titulo">📚 ¿Cómo se recicla?</h2>
+
+  <div class="tutorial-grid">
+    <div class="tutorial-card">
+      <div class="ic">🎯</div>
+      <h3>El objetivo</h3>
+      <p>Pon cada residuo en el contenedor correcto antes que se acabe el tiempo.</p>
+    </div>
+    <div class="tutorial-card">
+      <div class="ic">⭐</div>
+      <h3>Los puntos</h3>
+      <p>Ganas 10 puntos por cada respuesta correcta. ¡Responder rápido da puntos extra!</p>
+    </div>
+    <div class="tutorial-card">
+      <div class="ic">💚</div>
+      <h3>Las vidas</h3>
+      <p>Empiezas con 3 vidas. Pierdes una si te equivocas o se acaba el tiempo.</p>
+    </div>
+    <div class="tutorial-card">
+      <div class="ic">💡</div>
+      <h3>Dato curioso</h3>
+      <p>Después de cada pregunta aprenderás algo nuevo sobre el reciclaje.</p>
+    </div>
+  </div>
+
+  <h3 style="font-family:'Nunito',sans-serif;font-weight:800;color:#2c3e50;margin-top:6px">Los contenedores:</h3>
+  <div class="contenedores-info">
+    <div class="cont-info ci-verde">♻️ Verde — Vidrio</div>
+    <div class="cont-info ci-amarillo">🟡 Amarillo — Plástico y latas</div>
+    <div class="cont-info ci-azul">🔵 Azul — Papel y cartón</div>
+    <div class="cont-info ci-rojo">🔴 Rojo — No reciclable</div>
+    <div class="cont-info ci-cafe">🟤 Café — Orgánico</div>
+  </div>
+
+  <button class="btn-volver" onclick="irA('menu')">← Volver</button>
+</div>
+
+<!-- ====== ACERCA DE ====== -->
+<div class="screen" id="acerca">
+  <div class="sol" style="top:20px;right:60px;width:70px;height:70px;"></div>
+  <div class="nube" style="width:100px;height:38px;top:70px;animation-duration:20s;animation-delay:-4s"></div>
+  <div class="nube" style="width:70px;height:28px;top:110px;animation-duration:26s;animation-delay:-12s"></div>
+
+  <div class="acerca-contenido">
+    <div class="acerca-logo">&#x1F393;</div>
+
+    <div class="acerca-universidad">Universidad Pedag&#xF3;gica<br>Nacional Francisco Morraz&#xE1;n</div>
+
+    <div class="acerca-divider"></div>
+
+    <div class="acerca-card">
+      <div class="acerca-card-titulo">Proyecto</div>
+      <div class="acerca-card-valor">Realizado por alumnos del Grupo #1</div>
+    </div>
+
+    <div class="acerca-card highlight">
+      <div class="acerca-card-titulo">C&#xE1;tedra</div>
+      <div class="acerca-card-valor">Introducci&#xF3;n a la Educaci&#xF3;n Ambiental</div>
+    </div>
+
+    <div class="acerca-card">
+      <div class="acerca-card-titulo">Catedr&#xE1;tica</div>
+      <div class="acerca-card-valor">Lic. Abigail Maradiaga</div>
+    </div>
+
+    <div class="acerca-card-titulo" style="color:white;font-size:0.85rem;letter-spacing:2px;text-shadow:1px 1px 0 #1a6b2a;">&#x2728; INTEGRANTES &#x2728;</div>
+
+    <div class="integrantes-grid">
+      <div class="integrante-card" style="animation-delay:0.1s">
+        <div class="integrante-avatar ic-1">&#x1F338;</div>
+        <div class="integrante-nombre">Sandra</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+      <div class="integrante-card" style="animation-delay:0.2s">
+        <div class="integrante-avatar ic-2">&#x1F30A;</div>
+        <div class="integrante-nombre">Deysler</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+      <div class="integrante-card" style="animation-delay:0.3s">
+        <div class="integrante-avatar ic-3">&#x1F33F;</div>
+        <div class="integrante-nombre">Brayan</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+      <div class="integrante-card" style="animation-delay:0.4s">
+        <div class="integrante-avatar ic-4">&#x2600;&#xFE0F;</div>
+        <div class="integrante-nombre">Rossel</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+    </div>
+
+    <div class="acerca-footer">&#x1F30D; Juntos cuidamos el planeta &middot; 2025</div>
+
+    <button class="btn-volver" style="margin-top:4px" onclick="irA('menu')">&#x2190; Volver al men&#xFA;</button>
+  </div>
+
+  <div class="acerca-palmeras" id="acerca-palmeras"></div>
+</div>
+
+<!-- ====== RESULTADOS ====== -->
+<div class="screen" id="resultados">
+  <div class="resultado-trofeo" id="res-trofeo">&#x1F3C6;</div>
+  <div class="resultado-titulo" id="res-titulo">¡Increíble!</div>
+  <div class="estrellas" id="res-estrellas">⭐⭐⭐</div>
+  <div class="resultado-stats">
+    <div class="stat-card"><div class="num" id="res-puntos">0</div><div class="etq">Puntos</div></div>
+    <div class="stat-card"><div class="num" id="res-correctas">0</div><div class="etq">Correctas</div></div>
+    <div class="stat-card"><div class="num" id="res-racha">0</div><div class="etq">Racha máx.</div></div>
+  </div>
+  <div class="resultado-msg" id="res-msg">¡Eres un verdadero EcoHéroe!</div>
+  <div class="resultado-botones">
+    <button class="btn-menu verde" onclick="irA('nivel')">🔄 Jugar de nuevo</button>
+    <button class="btn-menu azul" onclick="irA('menu')">🏠 Menú</button>
+  </div>
+</div>
+
+<script>
+// ====================================================
+// DATOS DEL JUEGO
+// ====================================================
+const CONTENEDORES = [
+  { id: 'verde',    emoji: '♻️', nombre: 'Vidrio',         clase: 'cb-verde'   },
+  { id: 'amarillo', emoji: '🟡', nombre: 'Plástico/Latas', clase: 'cb-amarillo'},
+  { id: 'azul',     emoji: '🔵', nombre: 'Papel/Cartón',   clase: 'cb-azul'    },
+  { id: 'rojo',     emoji: '🔴', nombre: 'No reciclable',  clase: 'cb-rojo'    },
+  { id: 'cafe',     emoji: '🟤', nombre: 'Orgánico',       clase: 'cb-cafe'    },
+];
+
+const RESIDUOS = [
+  { emoji:'🍾', nombre:'Botella de vidrio',     contenedor:'verde',    dato:'El vidrio puede reciclarse infinitas veces sin perder calidad.' },
+  { emoji:'🥤', nombre:'Botella de plástico',   contenedor:'amarillo', dato:'Cada año se producen más de 400 millones de toneladas de plástico.' },
+  { emoji:'📰', nombre:'Periódico',             contenedor:'azul',     dato:'Reciclar 1 tonelada de papel salva 17 árboles.' },
+  { emoji:'🥫', nombre:'Lata de aluminio',      contenedor:'amarillo', dato:'El aluminio reciclado ahorra 95% de energía respecto a producirlo nuevo.' },
+  { emoji:'🍌', nombre:'Cáscara de plátano',    contenedor:'cafe',     dato:'Los residuos orgánicos se convierten en abono natural para plantas.' },
+  { emoji:'🪣', nombre:'Cubo de plástico roto', contenedor:'rojo',     dato:'Los plásticos que no se pueden limpiar o reciclar van al contenedor rojo.' },
+  { emoji:'📦', nombre:'Caja de cartón',        contenedor:'azul',     dato:'El cartón es uno de los materiales más reciclados del mundo.' },
+  { emoji:'🫙', nombre:'Tarro de cristal',      contenedor:'verde',    dato:'Un tarro de vidrio tarda más de 4.000 años en descomponerse.' },
+  { emoji:'🍕', nombre:'Cartón con grasa',      contenedor:'cafe',     dato:'El cartón manchado de comida va al orgánico, no al azul.' },
+  { emoji:'💊', nombre:'Medicamentos caducados',contenedor:'rojo',     dato:'Los medicamentos no van a la basura normal, ¡son peligrosos!' },
+  { emoji:'📱', nombre:'Celular viejo',         contenedor:'rojo',     dato:'Los aparatos electrónicos tienen puntos de recogida especiales.' },
+  { emoji:'🥚', nombre:'Cáscaras de huevo',     contenedor:'cafe',     dato:'Las cáscaras de huevo son excelente abono para el jardín.' },
+  { emoji:'📚', nombre:'Libro viejo',           contenedor:'azul',     dato:'¡Los libros en buen estado también se pueden donar!' },
+  { emoji:'🧴', nombre:'Envase de champú',      contenedor:'amarillo', dato:'Enjuaga los envases antes de reciclarlos para que queden limpios.' },
+  { emoji:'🌿', nombre:'Hojas del jardín',      contenedor:'cafe',     dato:'Las hojas se pueden convertir en compost para abonar el suelo.' },
+  { emoji:'🥛', nombre:'Tetra pak (jugo)',      contenedor:'amarillo', dato:'Los envases tetra pak son reciclables en el contenedor amarillo.' },
+  { emoji:'🖊️', nombre:'Bolígrafo sin tinta',  contenedor:'rojo',     dato:'Los bolígrafos tienen puntos de recolección especiales en muchas tiendas.' },
+  { emoji:'🍞', nombre:'Pan duro',              contenedor:'cafe',     dato:'El pan duro es alimento para pájaros o compost perfecto.' },
+  { emoji:'🥃', nombre:'Vaso de vidrio roto',   contenedor:'rojo',     dato:'El vidrio roto no va al verde porque puede lastimar a trabajadores.' },
+  { emoji:'📫', nombre:'Sobre de carta',        contenedor:'azul',     dato:'El papel de sobres es 100% reciclable en el contenedor azul.' },
+];
+
+const CONFIG = {
+  facil:   { total: 5,  tiempo: 20 },
+  medio:   { total: 8,  tiempo: 15 },
+  dificil: { total: 10, tiempo: 10 },
+};
+
+// ====================================================
+// ESTADO
+// ====================================================
+let estado = {
+  nivel: 'facil',
+  puntos: 0,
+  vidas: 3,
+  preguntaActual: 0,
+  totalPreguntas: 5,
+  tiempoMax: 20,
+  tiempoRestante: 20,
+  timer: null,
+  respondido: false,
+  residuos: [],
+  correctas: 0,
+  rachaActual: 0,
+  rachMax: 0,
+};
+
+// ====================================================
+// NAVEGACIÓN
+// ====================================================
+function irA(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'menu') generarPalmeras();
+  if (id === 'acerca') generarPalmerasEn('acerca-palmeras');
+}
+
+function generarPalmerasEn(containerId) {
+  const cont = document.getElementById(containerId);
+  if (!cont) return;
+  cont.innerHTML = '';
+  const cfgs = [
+    { altura:150, anchoTronco:18, hojas:6, clase:'p3' },
+    { altura:190, anchoTronco:21, hojas:7, clase:'p1' },
+    { altura:160, anchoTronco:19, hojas:6, clase:'p2' },
+    { altura:175, anchoTronco:20, hojas:6, clase:'p4' },
+    { altura:145, anchoTronco:17, hojas:5, clase:'p5' },
+  ];
+  cfgs.forEach(cfg => {
+    const wrap = document.createElement('div');
+    wrap.className = 'palmera-wrap ' + cfg.clase;
+    wrap.appendChild(crearPalmeraSVG(cfg.altura, cfg.anchoTronco, cfg.hojas));
+    cont.appendChild(wrap);
+  });
+}
+
+// ====================================================
+// PALMERAS
+// ====================================================
+function generarPalmeras() {
+  const cont = document.getElementById('palmeras-container');
+  if (!cont) return;
+  cont.innerHTML = '';
+  const configuraciones = [
+    { altura: 160, anchoTronco: 20, hojas: 6, clase: 'p1' },
+    { altura: 200, anchoTronco: 22, hojas: 7, clase: 'p2' },
+    { altura: 140, anchoTronco: 18, hojas: 5, clase: 'p3' },
+    { altura: 180, anchoTronco: 20, hojas: 6, clase: 'p4' },
+    { altura: 155, anchoTronco: 19, hojas: 6, clase: 'p5' },
+  ];
+
+  configuraciones.forEach(cfg => {
+    const wrap = document.createElement('div');
+    wrap.className = `palmera-wrap ${cfg.clase}`;
+
+    // SVG palmera
+    const svg = crearPalmeraSVG(cfg.altura, cfg.anchoTronco, cfg.hojas);
+    wrap.appendChild(svg);
+    cont.appendChild(wrap);
+  });
+}
+
+function crearPalmeraSVG(altura, anchoTronco, numHojas) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const w = 100, h = altura + 60;
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('width', w);
+  svg.setAttribute('height', h);
+  svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+  // Tronco curvo
+  const cx = w / 2;
+  const tronco = document.createElementNS(ns, 'path');
+  const curve = 12;
+  tronco.setAttribute('d', `M${cx - anchoTronco/2} ${h} C${cx - anchoTronco/2 + curve} ${h*0.6} ${cx + anchoTronco/2 - curve} ${h*0.3} ${cx} ${60}`);
+  tronco.setAttribute('stroke', '#cd853f');
+  tronco.setAttribute('stroke-width', anchoTronco);
+  tronco.setAttribute('fill', 'none');
+  tronco.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(tronco);
+
+  // Rayas del tronco
+  for (let i = 0; i < 5; i++) {
+    const y = h - 30 - i * (altura/6);
+    const raya = document.createElementNS(ns, 'line');
+    const offset = curve * (i / 5);
+    raya.setAttribute('x1', cx - anchoTronco/2 + offset + 2);
+    raya.setAttribute('y1', y);
+    raya.setAttribute('x2', cx + anchoTronco/2 - offset - 2);
+    raya.setAttribute('y2', y);
+    raya.setAttribute('stroke', '#a0522d');
+    raya.setAttribute('stroke-width', '1.5');
+    raya.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(raya);
+  }
+
+  // Hojas
+  const coloresHoja = ['#2ECC71','#27ae60','#1abc9c','#58d68d'];
+  for (let i = 0; i < numHojas; i++) {
+    const angulo = (360 / numHojas) * i - 90;
+    const rad = angulo * Math.PI / 180;
+    const longitud = 55 + Math.random() * 20;
+    const grosor = 10 + Math.random() * 6;
+
+    const hoja = document.createElementNS(ns, 'ellipse');
+    hoja.setAttribute('cx', cx + Math.cos(rad) * longitud / 2);
+    hoja.setAttribute('cy', 60 + Math.sin(rad) * longitud / 2);
+    hoja.setAttribute('rx', longitud / 2);
+    hoja.setAttribute('ry', grosor / 2);
+    hoja.setAttribute('fill', coloresHoja[i % coloresHoja.length]);
+    hoja.setAttribute('transform', `rotate(${angulo}, ${cx}, 60)`);
+    hoja.setAttribute('opacity', '0.9');
+    svg.appendChild(hoja);
+  }
+
+  // Coco decorativo
+  const coco = document.createElementNS(ns, 'circle');
+  coco.setAttribute('cx', cx);
+  coco.setAttribute('cy', 68);
+  coco.setAttribute('r', 6);
+  coco.setAttribute('fill', '#8B4513');
+  svg.appendChild(coco);
+
+  return svg;
+}
+
+// ====================================================
+// JUEGO - INICIAR
+// ====================================================
+function iniciarJuego(nivel) {
+  estado.nivel = nivel;
+  estado.puntos = 0;
+  estado.vidas = 3;
+  estado.preguntaActual = 0;
+  estado.correctas = 0;
+  estado.rachaActual = 0;
+  estado.rachMax = 0;
+  estado.totalPreguntas = CONFIG[nivel].total;
+  estado.tiempoMax = CONFIG[nivel].tiempo;
+
+  // Mezclar y seleccionar residuos
+  const mezclados = [...RESIDUOS].sort(() => Math.random() - 0.5);
+  estado.residuos = mezclados.slice(0, estado.totalPreguntas);
+
+  irA('juego');
+  mostrarPregunta();
+}
+
+// ====================================================
+// JUEGO - MOSTRAR PREGUNTA
+// ====================================================
+function mostrarPregunta() {
+  if (estado.preguntaActual >= estado.totalPreguntas || estado.vidas <= 0) {
+    finJuego();
+    return;
+  }
+
+  estado.respondido = false;
+  const residuo = estado.residuos[estado.preguntaActual];
+
+  document.getElementById('obj-emoji').textContent = residuo.emoji;
+  document.getElementById('obj-nombre').textContent = residuo.nombre;
+  document.getElementById('hud-puntos').textContent = estado.puntos;
+  document.getElementById('hud-pregunta').textContent = `${estado.preguntaActual + 1}/${estado.totalPreguntas}`;
+  document.getElementById('hud-vidas').textContent = '💚'.repeat(estado.vidas) + '🖤'.repeat(3 - estado.vidas);
+
+  // Limpiar feedback
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback-msg';
+  fb.textContent = '';
+  document.getElementById('dato-eco').className = 'dato-eco';
+
+  // Generar contenedores
+  renderizarContenedores();
+
+  // Iniciar temporizador
+  iniciarTemporizador();
+}
+
+function renderizarContenedores() {
+  const grid = document.getElementById('contenedores-grid');
+  grid.innerHTML = '';
+  CONTENEDORES.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = `contenedor-btn ${c.clase}`;
+    btn.dataset.id = c.id;
+    btn.innerHTML = `<span class="icono-c">${c.emoji}</span><span class="nombre-c">${c.nombre}</span>`;
+    btn.onclick = () => responder(c.id);
+    grid.appendChild(btn);
+  });
+}
+
+// ====================================================
+// TEMPORIZADOR
+// ====================================================
+function iniciarTemporizador() {
+  clearInterval(estado.timer);
+  estado.tiempoRestante = estado.tiempoMax;
+  actualizarBarraTiempo();
+
+  estado.timer = setInterval(() => {
+    estado.tiempoRestante--;
+    actualizarBarraTiempo();
+    if (estado.tiempoRestante <= 0) {
+      clearInterval(estado.timer);
+      if (!estado.respondido) tiempoAgotado();
+    }
+  }, 1000);
+}
+
+function actualizarBarraTiempo() {
+  const pct = (estado.tiempoRestante / estado.tiempoMax) * 100;
+  const barra = document.getElementById('barra-tiempo-fill');
+  barra.style.width = pct + '%';
+  if (pct > 60) barra.style.background = 'linear-gradient(90deg,#2ECC71,#27ae60)';
+  else if (pct > 30) barra.style.background = 'linear-gradient(90deg,#F1C40F,#e67e22)';
+  else barra.style.background = 'linear-gradient(90deg,#E74C3C,#c0392b)';
+}
+
+// ====================================================
+// RESPONDER
+// ====================================================
+function responder(idContenedor) {
+  if (estado.respondido) return;
+  estado.respondido = true;
+  clearInterval(estado.timer);
+
+  const residuo = estado.residuos[estado.preguntaActual];
+  const correcto = idContenedor === residuo.contenedor;
+  const btn = document.querySelector(`.contenedor-btn[data-id="${idContenedor}"]`);
+  const btnCorrecto = document.querySelector(`.contenedor-btn[data-id="${residuo.contenedor}"]`);
+
+  if (correcto) {
+    btn.classList.add('correcto');
+    const bonusVelocidad = Math.floor(estado.tiempoRestante / estado.tiempoMax * 5);
+    const pts = 10 + bonusVelocidad;
+    estado.puntos += pts;
+    estado.correctas++;
+    estado.rachaActual++;
+    if (estado.rachaActual > estado.rachMax) estado.rachMax = estado.rachaActual;
+    mostrarFeedback(true, `✅ ¡Correcto! +${pts} puntos`);
+  } else {
+    btn.classList.add('incorrecto');
+    btnCorrecto.style.border = '3px solid #2ECC71';
+    estado.vidas--;
+    estado.rachaActual = 0;
+    mostrarFeedback(false, `❌ Era: ${btnCorrecto.querySelector('.nombre-c').textContent}`);
+  }
+
+  mostrarDatoEco(residuo.dato);
+
+  setTimeout(() => {
+    estado.preguntaActual++;
+    mostrarPregunta();
+  }, 2500);
+}
+
+function tiempoAgotado() {
+  estado.respondido = true;
+  estado.vidas--;
+  estado.rachaActual = 0;
+  const residuo = estado.residuos[estado.preguntaActual];
+  mostrarFeedback(false, `⏰ ¡Tiempo! Era: ${CONTENEDORES.find(c=>c.id===residuo.contenedor).nombre}`);
+  mostrarDatoEco(residuo.dato);
+  setTimeout(() => {
+    estado.preguntaActual++;
+    mostrarPregunta();
+  }, 2500);
+}
+
+function mostrarFeedback(ok, msg) {
+  const fb = document.getElementById('feedback');
+  fb.textContent = msg;
+  fb.className = `feedback-msg show ${ok ? 'ok' : 'fail'}`;
+}
+
+function mostrarDatoEco(dato) {
+  const d = document.getElementById('dato-eco');
+  d.innerHTML = `💡 <strong>¿Sabías que?</strong> ${dato}`;
+  d.className = 'dato-eco show';
+}
+
+// ====================================================
+// FIN JUEGO
+// ====================================================
+function finJuego() {
+  clearInterval(estado.timer);
+  const pct = estado.correctas / estado.totalPreguntas;
+
+  let trofeo, titulo, msg, estrellas;
+  if (pct === 1) {
+    trofeo = '🏆'; titulo = '¡PERFECTO!'; estrellas = '⭐⭐⭐';
+    msg = '¡Eres un verdadero EcoHéroe! El planeta te lo agradece. 🌍';
+    lanzarConfeti();
+  } else if (pct >= 0.7) {
+    trofeo = '🥇'; titulo = '¡Muy bien!'; estrellas = '⭐⭐';
+    msg = '¡Excelente trabajo! Sigue aprendiendo sobre reciclaje. 🌿';
+  } else if (pct >= 0.4) {
+    trofeo = '🥈'; titulo = '¡Buen intento!'; estrellas = '⭐';
+    msg = 'Practica más y te convertirás en un experto reciclador. 💪';
+  } else {
+    trofeo = '🌱'; titulo = '¡Sigue intentando!'; estrellas = '';
+    msg = 'El reciclaje se aprende poco a poco. ¡No te rindas! 🤗';
+  }
+
+  document.getElementById('res-trofeo').textContent = trofeo;
+  document.getElementById('res-titulo').textContent = titulo;
+  document.getElementById('res-estrellas').textContent = estrellas;
+  document.getElementById('res-puntos').textContent = estado.puntos;
+  document.getElementById('res-correctas').textContent = `${estado.correctas}/${estado.totalPreguntas}`;
+  document.getElementById('res-racha').textContent = estado.rachMax;
+  document.getElementById('res-msg').textContent = msg;
+
+  irA('resultados');
+}
+
+// ====================================================
+// CONFETI
+// ====================================================
+function lanzarConfeti() {
+  const colores = ['#2ECC71','#F1C40F','#E74C3C','#3498DB','#9B59B6','#E67E22'];
+  for (let i = 0; i < 60; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confeti-item';
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.width = (8 + Math.random() * 10) + 'px';
+      el.style.height = (8 + Math.random() * 10) + 'px';
+      el.style.background = colores[Math.floor(Math.random() * colores.length)];
+      el.style.animationDuration = (2 + Math.random() * 3) + 's';
+      el.style.animationDelay = Math.random() + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 5000);
+    }, i * 50);
+  }
+}
+
+// ====================================================
+// INIT
+// ====================================================
+document.addEventListener('DOMContentLoaded', () => {
+  generarPalmeras();
+});
+</script>
+</body>
+</html>

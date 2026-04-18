@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Educación Ambiental</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --verde: #2ECC71;
+    --verde-oscuro: #1a8a4a;
+    --azul: #3498DB;
+    --amarillo: #F1C40F;
+    --naranja: #E67E22;
+    --cielo: #87CEEB;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background: #e8f5e9;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* ====== MENÚ PRINCIPAL ====== */
+  #menu {
+    background: linear-gradient(180deg, #87CEEB 0%, #b8f0c8 60%, #5cb85c 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sol {
+    position: absolute; top: 30px; right: 80px;
+    width: 80px; height: 80px;
+    background: #FFD700;
+    border-radius: 50%;
+    box-shadow: 0 0 40px 10px #ffe066;
+    animation: pulsaSol 3s ease-in-out infinite;
+  }
+  @keyframes pulsaSol {
+    0%,100% { box-shadow: 0 0 40px 10px #ffe066; }
+    50% { box-shadow: 0 0 60px 20px #ffe066; }
+  }
+
+  .nube {
+    position: absolute;
+    background: white;
+    border-radius: 50px;
+    opacity: 0.8;
+    animation: flotaNube linear infinite;
+  }
+  @keyframes flotaNube {
+    0% { transform: translateX(-200px); }
+    100% { transform: translateX(110vw); }
+  }
+
+  /* PALMERAS */
+  .palmeras-fondo {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 220px; display: flex; align-items: flex-end;
+    justify-content: space-around; padding: 0 30px;
+    pointer-events: none;
+  }
+  .tronco-palma {
+    width: 18px;
+    background: linear-gradient(90deg, #a0522d, #cd853f, #a0522d);
+    border-radius: 4px;
+  }
+  .hoja-palma {
+    position: absolute;
+    width: 70px; height: 18px;
+    background: var(--verde);
+    border-radius: 0 50% 50% 0;
+    transform-origin: left center;
+  }
+  .hojas-container { position: relative; width: 0; height: 0; }
+
+  .palmera-wrap { display: flex; flex-direction: column; align-items: center; transform-origin: bottom center; }
+  .palmera-wrap.p1 { animation: mecePalma1 3s ease-in-out infinite; }
+  .palmera-wrap.p2 { animation: mecePalma2 3.5s ease-in-out infinite; }
+  .palmera-wrap.p3 { animation: mecePalma3 2.8s ease-in-out infinite; }
+  .palmera-wrap.p4 { animation: mecePalma1 4s ease-in-out infinite reverse; }
+  .palmera-wrap.p5 { animation: mecePalma2 3.2s ease-in-out infinite; }
+
+  @keyframes mecePalma1 { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+  @keyframes mecePalma2 { 0%,100% { transform: rotate(-6deg); } 50% { transform: rotate(3deg); } }
+  @keyframes mecePalma3 { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(5deg); } }
+
+  .menu-titulo {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(2.2rem, 6vw, 4.5rem);
+    font-weight: 900;
+    color: white;
+    text-shadow: 4px 4px 0 #1a6b2a, -2px -2px 0 #1a6b2a, 2px -2px 0 #1a6b2a, -2px 2px 0 #1a6b2a;
+    margin-bottom: 10px;
+    animation: saltaTitulo 2s ease-in-out infinite;
+    z-index: 10; position: relative;
+    text-align: center;
+  }
+  @keyframes saltaTitulo {
+    0%,100% { transform: translateY(0) rotate(-1deg); }
+    50% { transform: translateY(-8px) rotate(1deg); }
+  }
+
+  .menu-subtitulo {
+    font-family: 'Nunito', sans-serif;
+    font-size: clamp(0.9rem, 2.5vw, 1.3rem);
+    font-weight: 700;
+    color: #1a6b2a;
+    background: rgba(255,255,255,0.7);
+    padding: 6px 20px; border-radius: 30px;
+    margin-bottom: 40px;
+    z-index: 10; position: relative;
+    text-align: center;
+  }
+
+  .menu-botones { display: flex; flex-direction: column; gap: 16px; z-index: 10; position: relative; }
+
+  .btn-menu {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.3rem; font-weight: 800;
+    padding: 16px 55px;
+    border: none; border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.2);
+    text-transform: uppercase; letter-spacing: 1px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .btn-menu:active { transform: translateY(4px); box-shadow: 0 2px 0 rgba(0,0,0,0.2); }
+  .btn-menu.verde  { background: var(--verde); color: white; }
+  .btn-menu.verde:hover  { background: #27ae60; transform: scale(1.04); }
+  .btn-menu.azul   { background: var(--azul); color: white; }
+  .btn-menu.azul:hover   { background: #2980b9; transform: scale(1.04); }
+  .btn-menu.naranja{ background: var(--naranja); color: white; }
+  .btn-menu.naranja:hover{ background: #d35400; transform: scale(1.04); }
+
+  /* ====== ACERCA DE ====== */
+  #acerca {
+    background: linear-gradient(180deg, #87CEEB 0%, #b8f0c8 60%, #5cb85c 100%);
+    position: relative; overflow: hidden;
+    padding: 30px 20px; gap: 0;
+    justify-content: flex-start;
+  }
+  .acerca-contenido {
+    position: relative; z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 22px; padding: 20px 0 220px; width: 100%; max-width: 680px;
+  }
+  .acerca-logo { font-size: 4rem; animation: saltaTitulo 2.5s ease-in-out infinite; }
+  .acerca-universidad {
+    font-family: 'Nunito', sans-serif; font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-weight: 900; color: white; text-align: center;
+    text-shadow: 3px 3px 0 #1a6b2a, -1px -1px 0 #1a6b2a, 1px -1px 0 #1a6b2a, -1px 1px 0 #1a6b2a;
+    line-height: 1.3;
+  }
+  .acerca-divider {
+    width: 80px; height: 5px; border-radius: 10px;
+    background: linear-gradient(90deg, #F1C40F, #2ECC71, #3498DB);
+  }
+  .acerca-card {
+    background: rgba(255,255,255,0.88);
+    border-radius: 22px; padding: 22px 28px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    width: 100%; text-align: center;
+  }
+  .acerca-card-titulo {
+    font-family: 'Nunito', sans-serif; font-size: 0.8rem; font-weight: 800;
+    color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+  }
+  .acerca-card-valor {
+    font-family: 'Nunito', sans-serif; font-size: clamp(1rem, 3vw, 1.25rem);
+    font-weight: 800; color: #1a6b2a;
+  }
+  .acerca-card.highlight .acerca-card-valor { color: var(--naranja); }
+  .integrantes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; width: 100%; }
+  .integrante-card {
+    background: rgba(255,255,255,0.92);
+    border-radius: 18px; padding: 18px 14px; text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1); transition: transform 0.2s;
+    animation: apareceTarjeta 0.5s ease both;
+  }
+  .integrante-card:hover { transform: translateY(-4px); }
+  @keyframes apareceTarjeta {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .integrante-avatar {
+    width: 60px; height: 60px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; margin: 0 auto 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .integrante-nombre { font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800; color: #2c3e50; }
+  .integrante-rol { font-size: 0.75rem; color: #888; margin-top: 3px; }
+  .ic-1 { background: linear-gradient(135deg,#2ECC71,#1abc9c); }
+  .ic-2 { background: linear-gradient(135deg,#3498DB,#2980b9); }
+  .ic-3 { background: linear-gradient(135deg,#9B59B6,#8e44ad); }
+  .ic-4 { background: linear-gradient(135deg,#E67E22,#d35400); }
+  .acerca-footer {
+    background: rgba(255,255,255,0.75);
+    border-radius: 16px; padding: 12px 24px;
+    font-family: 'Nunito', sans-serif; font-size: 0.85rem;
+    font-weight: 700; color: #1a6b2a; text-align: center;
+  }
+  .acerca-palmeras {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 220px; display: flex; align-items: flex-end;
+    justify-content: space-around; padding: 0 30px;
+    pointer-events: none; z-index: 1;
+  }
+
+  .btn-volver {
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700;
+    padding: 10px 30px; border-radius: 30px; border: none;
+    background: #ccc; color: #555; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-volver:hover { background: #bbb; }
+</style>
+</head>
+<body>
+
+<!-- ====== MENÚ PRINCIPAL ====== -->
+<div class="screen active" id="menu">
+  <div class="sol"></div>
+  <div class="nube" style="width:120px;height:45px;top:80px;animation-duration:18s;animation-delay:-5s"></div>
+  <div class="nube" style="width:80px;height:32px;top:130px;animation-duration:22s;animation-delay:-10s"></div>
+  <div class="nube" style="width:150px;height:50px;top:55px;animation-duration:25s;animation-delay:-2s"></div>
+
+  <div class="menu-titulo">🌿 Educación Ambiental</div>
+  <div class="menu-subtitulo">¡Aprende, explora y cuida el planeta!</div>
+
+  <div class="menu-botones">
+    <a href="reciclaje.html" style="text-decoration:none">
+      <button class="btn-menu verde">♻️ Aprende a reciclar</button>
+    </a>
+    <a href="ecosistemas.html" style="text-decoration:none">
+      <button class="btn-menu azul">🌍 Ecosistemas</button>
+    </a>
+    <button class="btn-menu naranja" onclick="irA('acerca')">🌎 Acerca de</button>
+  </div>
+
+  <div class="palmeras-fondo" id="palmeras-container"></div>
+</div>
+
+<!-- ====== ACERCA DE ====== -->
+<div class="screen" id="acerca">
+  <div class="sol" style="top:20px;right:60px;width:70px;height:70px;"></div>
+  <div class="nube" style="width:100px;height:38px;top:70px;animation-duration:20s;animation-delay:-4s"></div>
+  <div class="nube" style="width:70px;height:28px;top:110px;animation-duration:26s;animation-delay:-12s"></div>
+
+  <div class="acerca-contenido">
+    <div class="acerca-logo">🎓</div>
+
+    <div class="acerca-universidad">Universidad Pedagógica<br>Nacional Francisco Morazán</div>
+
+    <div class="acerca-divider"></div>
+
+    <div class="acerca-card">
+      <div class="acerca-card-titulo">Proyecto</div>
+      <div class="acerca-card-valor">Realizado por alumnos del Grupo #1</div>
+    </div>
+
+    <div class="acerca-card highlight">
+      <div class="acerca-card-titulo">Cátedra</div>
+      <div class="acerca-card-valor">Introducción a la Educación Ambiental</div>
+    </div>
+
+    <div class="acerca-card">
+      <div class="acerca-card-titulo">Catedrática</div>
+      <div class="acerca-card-valor">Lic. Abigail Maradiaga</div>
+    </div>
+
+    <div class="acerca-card-titulo" style="color:white;font-size:0.85rem;letter-spacing:2px;text-shadow:1px 1px 0 #1a6b2a;">✨ INTEGRANTES ✨</div>
+
+    <div class="integrantes-grid">
+      <div class="integrante-card" style="animation-delay:0.1s">
+        <div class="integrante-avatar ic-1">🌸</div>
+        <div class="integrante-nombre">Sandra</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+      <div class="integrante-card" style="animation-delay:0.2s">
+        <div class="integrante-avatar ic-2">🌊</div>
+        <div class="integrante-nombre">Deysler</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+      <div class="integrante-card" style="animation-delay:0.3s">
+        <div class="integrante-avatar ic-3">🌿</div>
+        <div class="integrante-nombre">Brayan</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+      <div class="integrante-card" style="animation-delay:0.4s">
+        <div class="integrante-avatar ic-4">☀️</div>
+        <div class="integrante-nombre">Rossel</div>
+        <div class="integrante-rol">Integrante</div>
+      </div>
+    </div>
+
+    <div class="acerca-footer">🌍 Juntos cuidamos el planeta · 2025</div>
+
+    <button class="btn-volver" style="margin-top:4px" onclick="irA('menu')">← Volver al menú</button>
+  </div>
+
+  <div class="acerca-palmeras" id="acerca-palmeras"></div>
+</div>
+
+<script>
+function irA(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'menu') generarPalmeras('palmeras-container');
+  if (id === 'acerca') generarPalmeras('acerca-palmeras');
+}
+
+function generarPalmeras(containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '';
+  const configs = [
+    { altura: 140, clase: 'p1', escala: 1 },
+    { altura: 110, clase: 'p2', escala: 0.85 },
+    { altura: 160, clase: 'p3', escala: 1.1 },
+    { altura: 120, clase: 'p4', escala: 0.9 },
+    { altura: 150, clase: 'p5', escala: 1.05 },
+  ];
+  configs.forEach(cfg => {
+    const wrap = document.createElement('div');
+    wrap.className = `palmera-wrap ${cfg.clase}`;
+
+    const hojasDiv = document.createElement('div');
+    hojasDiv.className = 'hojas-container';
+    const angulos = [-60, -30, 0, 30, 60, 90, 120, 150];
+    angulos.forEach(ang => {
+      const hoja = document.createElement('div');
+      hoja.className = 'hoja-palma';
+      hoja.style.transform = `rotate(${ang}deg)`;
+      hojasDiv.appendChild(hoja);
+    });
+
+    const tronco = document.createElement('div');
+    tronco.className = 'tronco-palma';
+    tronco.style.height = cfg.altura + 'px';
+
+    wrap.appendChild(hojasDiv);
+    wrap.appendChild(tronco);
+    container.appendChild(wrap);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  generarPalmeras('palmeras-container');
+});
+</script>
+</body>
+</html>
